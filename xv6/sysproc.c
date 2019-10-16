@@ -6,6 +6,7 @@
 #include "memlayout.h"
 #include "mmu.h"
 #include "proc.h"
+#include "pstat.h"
 
 int
 sys_fork(void)
@@ -89,3 +90,44 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+int
+sys_setpri(void){
+  int PID;
+  int pri;
+  if(argint(0, &PID) < 0){
+    return -1;
+  }
+  if(argint(1, &pri) < 0){
+    return -1;
+  }
+  return setpri(PID, pri);
+}
+
+int
+sys_getpri(void){
+  int PID;
+  if(argint(0, &PID) < 0){
+    return -1;
+  }
+  return getpri(PID);
+}
+
+int
+sys_fork2(void){
+  int pri;
+   if(argint(1, &pri) < 0){
+    return -1;
+  }
+  return fork2(pri);
+}
+
+int
+sys_getpinfo(void){
+  struct pstat *mystruct;
+  if(argptr(0, (void*)&mystruct, sizeof(*mystruct)) <0){
+	 return -1;
+  }
+  return getpinfo(mystruct);
+}
+
