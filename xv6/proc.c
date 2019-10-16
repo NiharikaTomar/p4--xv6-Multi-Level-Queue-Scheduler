@@ -565,6 +565,15 @@ int fork2(int pri){
 }
 
 int getpinfo(struct pstat *mystruct){
+  for (int i = 0; i < NPROC; i++){
+    if (ptable.proc[i].state == UNUSED){
+      mystruct->inuse[i] = 0;
+    } else {
+      mystruct->inuse[i] = 1;
+    }
+    mystruct->pid[i] = ptable.proc[i].pid;
+    mystruct->state[i] = ptable.proc[i].state;
+  }
   return -1;
 }
 
