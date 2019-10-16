@@ -103,10 +103,10 @@ extern int sys_unlink(void);
 extern int sys_wait(void);
 extern int sys_write(void);
 extern int sys_uptime(void);
-extern int setpri(void);
-extern int getpri(void);
-extern int fork2(void);
-extern int getpinfo(void);
+extern int sys_setpri(void);
+extern int sys_getpri(void);
+extern int sys_fork2(void);
+extern int sys_getpinfo(void);
 
 static int (*syscalls[])(void) = {
 [SYS_fork]    sys_fork,
