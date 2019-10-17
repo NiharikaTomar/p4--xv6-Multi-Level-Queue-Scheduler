@@ -48,6 +48,17 @@ struct proc {
   struct file *ofile[NOFILE];  // Open files
   struct inode *cwd;           // Current directory
   char name[16];               // Process name (debugging)
+  int qtail[4];                // total num times moved to tail of this queue
+                               // (e.g., setprio, end of timeslice, waking)
+  int ticks[NLAYER];           // total num ticks each process has accumulated
+                               // at each priority
+  int priority;                // current priority level of each process (0-3)
+  
+  // queues 0-3
+  char* q3; // priority 3
+  char* q2; // priority 2
+  char* q1; // priority 1
+  char* q0; // priority 0
 };
 
 // Process memory is laid out contiguously, low addresses first:

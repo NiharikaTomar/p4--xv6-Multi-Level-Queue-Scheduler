@@ -71,10 +71,13 @@ myproc(void) {
 // state required to run in the kernel.
 // Otherwise return 0.
 static struct proc*
-allocproc(void)
+allocproc(void)  //FIXME
 {
   struct proc *p;
   char *sp;
+  // p->ticks = 0; // initialize ticks and qtails
+  // p->qtail = 0;
+
 
   acquire(&ptable.lock);
 
@@ -179,45 +182,8 @@ growproc(int n)
 int
 fork(void)
 {
-  int i, pid;
-  struct proc *np;
-  struct proc *curproc = myproc();
-
-  // Allocate process.
-  if((np = allocproc()) == 0){
-    return -1;
-  }
-
-  // Copy process state from proc.
-  if((np->pgdir = copyuvm(curproc->pgdir, curproc->sz)) == 0){
-    kfree(np->kstack);
-    np->kstack = 0;
-    np->state = UNUSED;
-    return -1;
-  }
-  np->sz = curproc->sz;
-  np->parent = curproc;
-  *np->tf = *curproc->tf;
-
-  // Clear %eax so that fork returns 0 in the child.
-  np->tf->eax = 0;
-
-  for(i = 0; i < NOFILE; i++)
-    if(curproc->ofile[i])
-      np->ofile[i] = filedup(curproc->ofile[i]);
-  np->cwd = idup(curproc->cwd);
-
-  safestrcpy(np->name, curproc->name, sizeof(curproc->name));
-
-  pid = np->pid;
-
-  acquire(&ptable.lock);
-
-  np->state = RUNNABLE;
-
-  release(&ptable.lock);
-
-  return pid;
+  struct proc *p;
+  fork2(getpri(p->pid));
 }
 
 // Exit the current process.  Does not return.
@@ -318,8 +284,9 @@ wait(void)
 //  - eventually that process transfers control
 //      via swtch back to the scheduler.
 void
-scheduler(void)
+scheduler(void) //FIXME
 {
+
   struct proc *p;
   struct cpu *c = mycpu();
   c->proc = 0;
@@ -331,6 +298,17 @@ scheduler(void)
     // Loop over process table looking for process to run.
     acquire(&ptable.lock);
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+      if(p->priority == 3){
+      //  p->q3 //add process to q3
+      //  timer ticks for diff processes are diff
+      } else if(p->priority == 2) {
+
+      } else if(p->priority == 1) {
+
+      }
+      else if(p->priority == 0) {
+
+      }
       if(p->state != RUNNABLE)
         continue;
 
@@ -340,6 +318,7 @@ scheduler(void)
       c->proc = p;
       switchuvm(p);
       p->state = RUNNING;
+      //p->ticks[p]; ////***** increment this and qtails !!
 
       swtch(&(c->scheduler), p->context);
       switchkvm();
@@ -529,51 +508,89 @@ procdump(void)
   }
 }
 
-int setpri(int PID, int pri){
-int cnt = 0;
-struct proc *p;
+int setpri(int PID, int pri){ // FIXME
+  struct proc *p;
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
     if(p->pid == PID){
-      for(int i =0; i < NOFILE; i++){
-        if(p->ofile[i]){
-          cnt++;
-        }
-      }
+      p->priority = pri;
     }
   }
-  return cnt;
-
+  return pri;
 }
 
-int getpri(int PID){
-  int cnt = 0;
+int getpri(int PID){ // FIXME
+  int pri = 0;
+  struct proc *p;
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+    if(p->pid == PID){
+        pri = ptable.proc[p].priority;
+    }
+  }
+  return pri;
+}
+
+int fork2(int pri){  // FIXME
+  int i, pid;
+  struct proc *np;
+  struct proc *curproc = myproc();
+
+  // Allocate process.
+  if((np = allocproc()) == 0){
+    return -1;
+  }
+
+  // Copy process state from proc.
+  if((np->pgdir = copyuvm(curproc->pgdir, curproc->sz)) == 0){
+    kfree(np->kstack);
+    np->kstack = 0;
+    np->state = UNUSED;
+    return -1;
+  }
+  np->sz = curproc->sz;
+  np->parent = curproc;
+  *np->tf = *curproc->tf;
+
+  // Clear %eax so that fork returns 0 in the child.
+  np->tf->eax = 0;
+
+  for(i = 0; i < NOFILE; i++)
+    if(curproc->ofile[i])
+      np->ofile[i] = filedup(curproc->ofile[i]);
+  np->cwd = idup(curproc->cwd);
+
+  safestrcpy(np->name, curproc->name, sizeof(curproc->name));
+
+  pid = np->pid;
+
+  //setpri(pid,getpri(pid));  //FIXME
+
+  acquire(&ptable.lock);
+
+  np->state = RUNNABLE;
+
+  release(&ptable.lock);
+
+  return pid;
+}
+
+int getpinfo(struct pstat *mystruct){ // FIXME
+  acquire(&ptable.lock);
   struct proc *p;
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-      if(p->pid == PID){
-        for(int i =0; i < NOFILE; i++){
-          if(p->ofile[i]){
-            cnt++;
-          }
-        }
-      }
-    }
-    return cnt;
-}
-
-int fork2(int pri){
-  return -1;
-}
-
-int getpinfo(struct pstat *mystruct){
-  for (int i = 0; i < NPROC; i++){
-    if (ptable.proc[i].state == UNUSED){
-      mystruct->inuse[i] = 0;
+    if (p->state == UNUSED){
+      mystruct->inuse[p] = 0;
     } else {
-      mystruct->inuse[i] = 1;
+      mystruct->inuse[p] = 1;
     }
-    mystruct->pid[i] = ptable.proc[i].pid;
-    mystruct->state[i] = ptable.proc[i].state;
+    mystruct->pid[p] = p->pid;
+    mystruct->state[p] = p->state;
+    mystruct->priority[p] = p->priority;
+    for (int i = 0; i < 4; i++) {
+      mystruct->ticks[i] = p->ticks[i];
+      mystruct->qtail[i] = p->qtail[i];
+    }
   }
+  release(&ptable.lock);
   return -1;
 }
 
