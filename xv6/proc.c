@@ -8,6 +8,14 @@
 #include "spinlock.h"
 #include "pstat.h"
 
+//FIXME
+int t0 =-1;
+int t1=-1;
+int t2=-1;
+int t3=-1;
+int TicksPerPrio[4] ={8,12,16,20};
+//FIXME
+
 struct {
   struct spinlock lock;
   struct proc proc[NPROC];
@@ -85,12 +93,42 @@ allocproc(void)  //FIXME
     if(p->state == UNUSED)
       goto found;
 
+      //FIXME
+    p->priority = 0;
+		p->clicks = 0;
+		c0++;
+		p->q0[c0] = p;
+		pstat.inuse[p->pid] = 1;
+		pstat.priority[p->pid] = p->priority;
+		pstat.ticks[p->pid][0] = 0;
+		pstat.ticks[p->pid][1] = 0;
+		pstat.ticks[p->pid][2] = 0;
+		pstat.ticks[p->pid][3] = 0;
+		pstat.pid[p->pid] = p->pid;
+
+      //FIXME
+
   release(&ptable.lock);
   return 0;
 
 found:
   p->state = EMBRYO;
   p->pid = nextpid++;
+
+//FIXME
+  pstat_var.inuse[p->pid] = 1;
+	p->priority = 0;
+	p->clicks = 0;
+	c0++;
+	q0[c0] = p;
+  pstat.priority[p->pid] = p->priority;
+  pstat.ticks[p->pid][0] = 0;
+  pstat.ticks[p->pid][1] = 0;
+  pstat.ticks[p->pid][2] = 0;
+  pstat.ticks[p->pid][3] = 0;
+  pstat.pid[p->pid] = p->pid;
+
+//FIXME
 
   release(&ptable.lock);
 
@@ -299,6 +337,11 @@ scheduler(void) //FIXME
     acquire(&ptable.lock);
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
       if(p->priority == 3){
+        q3.pid = p->pid;
+        //qtail++;
+        for(int i=0; i<9; i++){
+
+        }
       //  p->q3 //add process to q3
       //  timer ticks for diff processes are diff
       } else if(p->priority == 2) {
@@ -431,13 +474,53 @@ sleep(void *chan, struct spinlock *lk)
 // Wake up all processes sleeping on chan.
 // The ptable lock must be held.
 static void
-wakeup1(void *chan)
+wakeup1(void *chan)  //FIXME
 {
   struct proc *p;
 
-  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
-    if(p->state == SLEEPING && p->chan == chan)
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+    if(p->state == SLEEPING && p->chan == chan){
+      p->ticks = 0; //FIXME
       p->state = RUNNABLE;
+
+      //FIXME
+      if(p->priority == 0) {
+				c0++;
+				for(i=c0;i>0;i--) {
+					q0[i] = q0[i-1];
+				}
+				q0[0] = p;
+			}
+			else if(p->priority == 1) {
+				c1++;
+				for(i=c1;i>0;i--) {
+					q1[i] = q1[i-1];
+				}
+				q1[0] = p;
+			}
+			else if(p->priority == 2) {
+				c2++;
+				for(i=c2;i>0;i--) {
+					q2[i] = q2[i-1];
+				}
+				q2[0] = p;
+			}
+			else  {
+				c3++;
+				for(i=c3;i>0;i--) {
+					q3[i] = q3[i-1];
+				}
+				q3[0] = p;
+			}
+
+				for (p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+								if (p->state == SLEEPING && p->chan == chan){
+												p->state = RUNNABLE;
+                      }
+                    }
+                  }
+                }
+      //FIXME
 }
 
 // Wake up all processes sleeping on chan.
