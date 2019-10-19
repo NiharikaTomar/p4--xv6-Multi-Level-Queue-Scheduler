@@ -325,7 +325,7 @@ scheduler(void) //FIXME
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
 
     	if(p->state != RUNNABLE)
-        continue;
+        	continue;
 
       //FIXME
       //checks if process is runnable, else dont add to queue
@@ -434,6 +434,20 @@ scheduler(void) //FIXME
 
       // //FIXME
       if(q3[0] != 0){
+
+      	p = q3[0];
+
+      	for(int i=0; i<NPROC; i++){
+      		if(p->state != RUNNABLE){
+	      		delete(q3);
+	      		//resetting tick timer
+	          	p->ticksUsed[3] = 0;
+      		}
+
+      		p = q3[0];
+      	}
+
+      	
         if(p->ticksUsed[3] < 8){
           //*******************
           // Switch to chosen process.  It is the process's job
@@ -457,6 +471,18 @@ scheduler(void) //FIXME
         }
       
       } else if(q2[0] != 0) {
+      	p = q2[0];
+
+      	for(int i=0; i<NPROC; i++){
+      		if(p->state != RUNNABLE){
+	      		delete(q2);
+	      		//resetting tick timer
+	          	p->ticksUsed[2] = 0;
+      		}
+
+      		p = q2[0];
+      	}
+
         if(p->ticksUsed[2] < 12){
           //*******************
           // Switch to chosen process.  It is the process's job
@@ -475,11 +501,23 @@ scheduler(void) //FIXME
           p->ticksUsed[2] = p->ticksUsed[2] + 1;
         } else{
           //REMOVE process from queue
-          delete(q3);
+          delete(q2);
           //resetting tick timer
-          p->ticksUsed[3] = 0;
+          p->ticksUsed[2] = 0;
         }
       } else if(q1[0] != 0) {
+      	p = q1[0];
+
+      	for(int i=0; i<NPROC; i++){
+      		if(p->state != RUNNABLE){
+	      		delete(q1);
+	      		//resetting tick timer
+	          	p->ticksUsed[1] = 0;
+      		}
+
+      		p = q1[0];
+      	}
+
         if(p->ticksUsed[1] < 16){
           //*******************
           // Switch to chosen process.  It is the process's job
@@ -498,11 +536,23 @@ scheduler(void) //FIXME
           p->ticksUsed[1] = p->ticksUsed[1] + 1;
         } else{
           //REMOVE process from queue
-          delete(q3);
+          delete(q1);
           //resetting tick timer
-          p->ticksUsed[3] = 0;
+          p->ticksUsed[1] = 0;
         }
       } else if(q0[0] != 0) {
+      	p = q0[0];
+
+      	for(int i=0; i<NPROC; i++){
+      		if(p->state != RUNNABLE){
+	      		delete(q0);
+	      		//resetting tick timer
+	          	p->ticksUsed[0] = 0;
+      		}
+
+      		p = q0[0];
+      	}
+
         if(p->ticksUsed[0] < 20){
           //*******************
           // Switch to chosen process.  It is the process's job
@@ -521,9 +571,9 @@ scheduler(void) //FIXME
           p->ticksUsed[0] = p->ticksUsed[0] + 1;
         } else{
           //REMOVE process from queue
-          delete(q3);
+          delete(q0);
           //resetting tick timer
-          p->ticksUsed[3] = 0;
+          p->ticksUsed[0] = 0;
         }
       }
       //FIXME
