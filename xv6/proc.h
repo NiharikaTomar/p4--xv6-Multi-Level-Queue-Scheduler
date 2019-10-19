@@ -54,11 +54,9 @@ struct proc {
                                // at each priority
   int priority;                // current priority level of each process (0-3)
 
-  // queues 0-3
-  char* q3[100]; // priority 3
-  char* q2[100]; // priority 2
-  char* q1[100]; // priority 1
-  char* q0[100]; // priority 0
+  int ticksUsed[NLAYER];       // total num ticks each process has used up
+                               // at each priority
+
 };
 
 // Process memory is laid out contiguously, low addresses first:
