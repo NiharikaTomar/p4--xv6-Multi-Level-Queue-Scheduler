@@ -290,13 +290,8 @@ wait(void)
 struct proc**
 delete(struct proc **queue){
   // temp array to store queue data
-  struct proc *temp[NPROC];
-
-  for(int i = 0; i < NPROC; i++){
-    temp[i] = queue[i+1];
-  }
-  for(int i = 0; i < NPROC; i++){
-    queue[i] = temp[i];
+  for(int i = 1; i < NPROC; i++){
+    queue[i-1] = queue[i];
   }
   queue[NPROC-1] = 0;
   return queue;
@@ -328,10 +323,8 @@ scheduler(void) //FIXME
     	if(p->state != RUNNABLE)
         	continue;
 
-      //FIXME
       //checks if process is runnable, else dont add to queue
       if(p->state == RUNNABLE){
-
         // based on priority, add processes to queue
         if(p->priority == 3){
           int match = 0;
@@ -425,24 +418,16 @@ scheduler(void) //FIXME
             p->ticks[0] = 20;
           }
         }
-       }
-      // //FIXME
-      // //
-
-    	
-      
-        //**********************
-
-      // //FIXME
+      }
+      // Check if priority queue is not empty and run the process
       if(q3[0] != 0){
-
       	p = q3[0];
 
       	for(int i=0; i<NPROC; i++){
       		if(p->state != RUNNABLE){
 	      		delete(q3);
 	      		//resetting tick timer
-	          	p->ticksUsed[3] = 0;
+	          p->ticksUsed[3] = 0;
       		}
 
       		p = q3[0];
@@ -450,18 +435,14 @@ scheduler(void) //FIXME
 
       	
         if(p->ticksUsed[3] < 8){
-          //*******************
           // Switch to chosen process.  It is the process's job
           // to release ptable.lock and then reacquire it
           // before jumping back to us.
           c->proc = p;
           switchuvm(p);
           p->state = RUNNING;
-          //*******************
           swtch(&(c->scheduler), p->context);
-          switchkvm();
-          //****************
-      
+          switchkvm();      
           // set timer ticks for particular time slice for queue3
           p->ticksUsed[3] = p->ticksUsed[3] + 1;
         } else{
@@ -483,21 +464,15 @@ scheduler(void) //FIXME
 
       		p = q2[0];
       	}
-
         if(p->ticksUsed[2] < 12){
-          //*******************
           // Switch to chosen process.  It is the process's job
           // to release ptable.lock and then reacquire it
           // before jumping back to us.
           c->proc = p;
           switchuvm(p);
           p->state = RUNNING;
-          //*******************
           swtch(&(c->scheduler), p->context);
           switchkvm();
-          //****************
-      
-      
           // set timer ticks for particular time slice for queue2
           p->ticksUsed[2] = p->ticksUsed[2] + 1;
         } else{
@@ -513,12 +488,10 @@ scheduler(void) //FIXME
       		if(p->state != RUNNABLE){
 	      		delete(q1);
 	      		//resetting tick timer
-	          	p->ticksUsed[1] = 0;
+	          p->ticksUsed[1] = 0;
       		}
-
       		p = q1[0];
       	}
-
         if(p->ticksUsed[1] < 16){
           //*******************
           // Switch to chosen process.  It is the process's job
@@ -527,15 +500,11 @@ scheduler(void) //FIXME
           c->proc = p;
           switchuvm(p);
           p->state = RUNNING;
-          //*******************
           swtch(&(c->scheduler), p->context);
           switchkvm();
-          //****************
-      
-      
           // set timer ticks for particular time slice for queue1
           p->ticksUsed[1] = p->ticksUsed[1] + 1;
-        } else{
+        } else {
           //REMOVE process from queue
           delete(q1);
           //resetting tick timer
@@ -544,30 +513,25 @@ scheduler(void) //FIXME
       } else if(q0[0] != 0) {
       	p = q0[0];
 
-      	for(int i=0; i<NPROC; i++){
+      	for(int i = 0; i < NPROC; i++){
       		if(p->state != RUNNABLE){
 	      		delete(q0);
 	      		//resetting tick timer
-	          	p->ticksUsed[0] = 0;
+	          p->ticksUsed[0] = 0;
       		}
 
       		p = q0[0];
       	}
 
         if(p->ticksUsed[0] < 20){
-          //*******************
           // Switch to chosen process.  It is the process's job
           // to release ptable.lock and then reacquire it
           // before jumping back to us.
           c->proc = p;
           switchuvm(p);
           p->state = RUNNING;
-          //*******************
           swtch(&(c->scheduler), p->context);
           switchkvm();
-          //****************
-      
-      
           // set timer ticks for particular time slice for queue0
           p->ticksUsed[0] = p->ticksUsed[0] + 1;
         } else{
@@ -577,18 +541,6 @@ scheduler(void) //FIXME
           p->ticksUsed[0] = 0;
         }
       }
-      //FIXME
-
-      // Switch to chosen process.  It is the process's job
-      // to release ptable.lock and then reacquire it
-      // before jumping back to us.
-//       c->proc = p;
-//       switchuvm(p);
-//       p->state = RUNNING;
-// //*******************
-//       swtch(&(c->scheduler), p->context);
-//       switchkvm();
-
 
       // Process is done running for now.
       // It should have changed its p->state before coming back.
@@ -780,29 +732,27 @@ procdump(void)
 int setpri(int PID, int pri){
 
   struct proc *p;
-  acquire(&ptable.lock);
+
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
     if(p->pid == PID){
       p->priority = pri;
-      break;
+      return pri;
     }
   }
-  release(&ptable.lock);
-  return pri;
+  return -1;
 }
 
 int getpri(int PID){
   
   int pri = -1;
   struct proc *p;
-  acquire(&ptable.lock);
+
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
     if(p->pid == PID){
         pri = p->priority;
         break;
     }
   }
-  release(&ptable.lock);
   return pri;
 }
 
@@ -865,10 +815,13 @@ fork2(int pri)
 }
 
 int getpinfo(struct pstat *mystruct){ // FIXME
-  //cquire(&ptable.lock);
+  if (mystruct == 0) {
+    return -1;
+  }
+
   struct proc *p = ptable.proc;
 
-    for(int i = 0; i < NPROC; i++){
+  for(int i = 0; i < NPROC; i++){
     if (p[i].state == UNUSED){
       mystruct->inuse[i] = 0;
     } else {
@@ -882,7 +835,6 @@ int getpinfo(struct pstat *mystruct){ // FIXME
       mystruct->qtail[i][j] = p->qtail[j];
     }
   }
-  //release(&ptable.lock);
-  return -1;
+  return 0;
 }
 
