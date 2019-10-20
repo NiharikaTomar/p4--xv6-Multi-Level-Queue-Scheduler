@@ -34,23 +34,24 @@ main(int argc, char *argv[])
       int new_pri;
 
       if(pri == 1){
-	setpri(c_pid, 2);
+	       setpri(c_pid, 2);
       }else{
-	setpri(c_pid, 1);
+	     setpri(c_pid, 1);
       }
       new_pri = getpri(c_pid);
       
       if( new_pri != pri && (new_pri >= 0 && new_pri <=3)){
-	printf(1, "XV6_SCHEDULER\t SUCCESS\n");
+        printf(1, "XV6_SCHEDULER\t SUCCESS\n");
       }else if (new_pri == pri){
-	printf(1, "XV6_SCHEDULER\t setpri() FAILED\n");
-    }
+        printf(1, "XV6_SCHEDULER\t setpri() FAILED\n");
 
+    }
     }
   }
 
   for (i = 0; i < 1; i++) {
 
+  printf(1, "HEEEEEEEY\n");
     wait();
   }
 

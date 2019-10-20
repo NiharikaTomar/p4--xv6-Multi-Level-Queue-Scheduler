@@ -52,7 +52,7 @@ main(int argc, char *argv[])
       if (i % 2 == 1) {
           t = 12; // for this process, give up CPU for one time-slice
       }
-      workload(400000000, t);
+      workload(600000000, t);
       exit();
     } else {
       //setpri(c_pid, 2);

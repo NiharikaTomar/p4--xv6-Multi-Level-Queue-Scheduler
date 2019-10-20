@@ -49,19 +49,20 @@ main(int argc, char *argv[])
       if (i % 2 == 1) {
           t = 64*5; // for this process, give up CPU for one time-slice
       }
-      workload(300000000, t);
+      workload(600000000, t);
       exit();
     } else {
       //setpri(c_pid, 2);
     }
   }
 
-  for (i = 0; i < 12; i++) { 
+  for (i = 0; i < 9; i++) { 
     sleep(20);
     check(getpinfo(&st) == 0, "getpinfo");
     
     for (j = 0; j < NPROC; j++) {
       if (st.inuse[j] && st.pid[j] >= 3 && st.pid[j] != getpid()) {
+	DEBUG_PRINT((1, "%d\n", i));
 	DEBUG_PRINT((1, "XV6_SCHEDULER\t CHILD\n"));
         //DEBUG_PRINT((1, "pid: %d\n", st.pid[j]));
         for (k = 3; k >= 0; k--) {

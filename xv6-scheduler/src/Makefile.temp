@@ -176,16 +176,16 @@ UPROGS=\
 	_kill\
 	_ln\
 	_ls\
-	_test_1\
-	_test_2\
-	_test_3\
-	_test_4\
-	_test_5\
-	_test_6\
-	_test_7\
-	_test_8\
-	_test_9\
-	_test_10\
+	_test_21\
+	_test_22\
+	_test_23\
+	_test_24\
+	_test_25\
+	_test_26\
+	_test_27\
+	_test_28\
+	_test_29\
+	_test_30\
 	_mkdir\
 	_rm\
 	_sh\
@@ -195,6 +195,9 @@ UPROGS=\
 	_zombie\
 	_userRR\
 	_test_3\
+	_test_7\
+	_test_9\
+	_test_11\
 
 fs.img: mkfs README $(UPROGS)
 	./mkfs fs.img README $(UPROGS)

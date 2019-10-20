@@ -10,6 +10,6 @@ main(int argc, char *argv[])
   p = myproc();
   sleep(10);
   printf(1, p->pid);
-	exit();
+  exit();
 }
 

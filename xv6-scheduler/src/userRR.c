@@ -1,8 +1,9 @@
+
 #include "types.h"
 #include "stat.h"
 #include "user.h"
-#include "fs.h"
-#include "fcntl.h"
+#include "pstat.h"
+#include "syscall.h"
 
 int
 main(int argc, char *argv[])
@@ -12,17 +13,34 @@ main(int argc, char *argv[])
     printf(1, "Illegal number of arguments\n");
     exit();
   }
+  // struct proc *cur_proc;
+  // check(getpinfo(&cur_proc) == 0, "getpinfo");
 
-  // // arguments to be passed by user
+  // arguments to be passed by user
   // int userTimeSlice = atoi(argv[1]);
   // int iterations = atoi(argv[2]);
-  // char job[100];
-  // strcpy(job, argv[1]); 
   // int jobCount = atoi(argv[4]);
 
-  // for (int i = 0; i < iterations; i++) {
+  // char job[64];
 
+  // // Loop through the amount of jobs needed to be created
+  // for (int i = 0; i < jobCount; i++) {
+
+  //   strcpy(job, argv[3]); 
+
+  //   int cur_pid = fork();
+  //   int priority = getpri(cur_pid);
+  //   exec(job[0], job);
+
+  //   // Set priority to the highest
+  //   setpri(cur_pid, 3);
+  //   sleep(userTimeSlice);  
+  //   setpri(cur_pid, 0);
   // }
 
-   exit(); 	
+  // for(int i = 0; i < iterations; i++) {
+  //    kill(cur_pid[i]);
+  // }
+
+  exit(); 	
 }
