@@ -2,10 +2,8 @@
 #include "defs.h"
 #include "param.h"
 #include "memlayout.h"
-// #include "mmu.h"
 #include "x86.h"
 #include "pstat.h"
-// #include "proc.h"
 #include "spinlock.h"
 
 
@@ -195,8 +193,6 @@ growproc(int n)
   return 0;
 }
 
-
-
 // removing a process from the queue
 struct proc**
 delete(struct proc **queue){
@@ -250,27 +246,26 @@ exit(void)
 
   // Jump into the scheduler, never to return.
   curproc->state = ZOMBIE;
-  //***********
-  // if(p->state == ZOMBIE){
-  //   if (p->priority == 3) {
-  //     delete(q3);
-  //     //resetting tick timer
-  //     p->ticksUsed[3] = 0;
-  //   } else if (p->priority == 2) {
-  //     delete(q2);
-  //     //resetting tick timer
-  //     p->ticksUsed[2] = 0;
-  //   } else if (p->priority == 1) {
-  //     delete(q1);
-  //     //resetting tick timer
-  //     p->ticksUsed[1] = 0;
-  //   } else if (p->priority == 0) {
-  //     delete(q0);
-  //     //resetting tick timer
-  //     p->ticksUsed[0] = 0;
-  //   }
-  // }
 
+  if (curproc->state == ZOMBIE) {
+    if (curproc->priority == 3) {
+      delete(q3);
+      // Resetting timer tick
+      curproc->ticksUsed[3] = 0;
+    } else if (curproc->priority == 2) {
+      delete(q2);
+      // Resetting timer tick
+      curproc->ticksUsed[2] = 0;
+    } else if (curproc->priority == 1) {
+      delete(q1);
+      // Resetting timer tick
+      curproc->ticksUsed[1] = 0;
+    } else if (curproc->priority == 0) {
+      delete(q0);
+      // Resetting timer tick
+      curproc->ticksUsed[0] = 0;
+    }
+  }
   sched();
   panic("zombie exit");
 }
@@ -452,7 +447,7 @@ scheduler(void) //FIXME
 	      		//resetting tick timer
 	          p->ticksUsed[3] = 0;
       		}
-          if (q3[0] != 0){  
+          if (q3[0] != 0){
             p = q3[0];
           }
           if (p->state == RUNNABLE) {
@@ -467,7 +462,7 @@ scheduler(void) //FIXME
           switchuvm(p);
           p->state = RUNNING;
           swtch(&(c->scheduler), p->context);
-          switchkvm();      
+          switchkvm();
           //set timer ticks for particular time slice for queue3
           p->ticksUsed[3] = p->ticksUsed[3] + 1;
         } else{
@@ -476,7 +471,7 @@ scheduler(void) //FIXME
           //resetting tick timer
           p->ticksUsed[3] = 0;
         }
-      
+
       } else if(q2[0] != 0) {
       	p = q2[0];
 
@@ -486,7 +481,7 @@ scheduler(void) //FIXME
 	      		//resetting tick timer
 	          	p->ticksUsed[2] = 0;
       		}
-          if (q2[0] != 0){  
+          if (q2[0] != 0){
             p = q2[0];
           }
 
@@ -520,7 +515,7 @@ scheduler(void) //FIXME
 	      		//resetting tick timer
 	          p->ticksUsed[1] = 0;
       		}
-          if (q1[0] != 0){  
+          if (q1[0] != 0){
             p = q1[0];
           }
 
@@ -555,7 +550,7 @@ scheduler(void) //FIXME
 	      		//resetting tick timer
 	          p->ticksUsed[0] = 0;
       		}
-          if (q0[0] != 0){  
+          if (q0[0] != 0){
             p = q0[0];
           }
 
@@ -580,6 +575,8 @@ scheduler(void) //FIXME
           //resetting tick timer
           p->ticksUsed[0] = 0;
         }
+      } else { // No proceses in all 4 priorities
+        continue;
       }
 
       // Process is done running for now.
@@ -590,6 +587,7 @@ scheduler(void) //FIXME
 
   }
 }
+
 
 // Enter scheduler.  Must hold only ptable.lock
 // and have changed proc->state. Saves and restores
@@ -780,121 +778,8 @@ int setpri(int PID, int pri){
   acquire(&ptable.lock);
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
     if(p->pid == PID){
-      // if(p->priority == pri) 
-      //   p->qtail[p->priority]++;
       p->priority = pri;
-
-      // //delete the process from the queue
-      // if (pri == 3) {
-      //   delete(q3);
-      //   p->ticksUsed[3] = 0;
-      // } else if (pri == 2) {
-      //   delete(q2);
-      //   p->ticksUsed[2] = 0;
-      // } else if (pri == 1) {
-      //   delete(q1);
-      //   p->ticksUsed[1] = 0;
-      // } else if (pri == 0) {
-      //   delete(q0);
-      //   p->ticksUsed[0] = 0;
-      // }
-      // //inser process to the back of the queue
-      // // based on priority, add processes to queue
-      // if(p->priority == 3){
-      //   int match = 0;
-      //   for(int i = 0; i < NPROC; i++){
-      //      if(q3[i] == 0){
-      //       continue;
-      //     }
-      //     if(q3[i]->pid == p->pid){
-      //       match = 1;
-      //       break;
-      //     }
-      //   }
-      //   if (match == 0) {
-      //     for(int i = 0; i < NPROC; i++){
-      //       if(q3[i] == 0){
-      //         q3[i] = p;
-      //         break;
-      //       }
-      //     }
-      //     p->qtail[3] = p->qtail[3] + 1;
-      //     // set timer ticks for particular time slice for queue3
-      //     p->ticks[3] = 8;
-      //   }
-      // }
-      // else if(p->priority == 2){
-      //   int match = 0;
-      //   for(int i = 0; i < NPROC; i++){
-      //      if(q2[i] == 0){
-      //       continue;
-      //     }
-      //     if(q2[i]->pid == p->pid){
-      //       match = 1;
-      //       break;
-      //     }
-      //   }
-      //   if (match == 0) {
-      //     for(int i = 0; i < NPROC; i++){
-      //       if(q2[i] == 0){
-      //         q2[i] = p;
-      //         break;
-      //       }
-      //     }
-      //     p->qtail[2] = p->qtail[2] + 1;
-      //     // set timer ticks for particular time slice for queue3
-      //     p->ticks[2] = 12;
-      //   }
-      // }
-      // else if(p->priority == 1){
-      //   int match = 0;
-      //   for(int i = 0; i < NPROC; i++){
-      //      if(q1[i] == 0){
-      //       continue;
-      //     }
-      //     if(q1[i]->pid == p->pid){
-      //       match = 1;
-      //       break;
-      //     }
-      //   }
-      //   if (match == 0) {
-      //     for(int i = 0; i < NPROC; i++){
-      //       if(q1[i] == 0){
-      //         q1[i] = p;
-      //         break;
-      //       }
-      //     }
-      //     p->qtail[1] = p->qtail[1] + 1;
-      //     // set timer ticks for particular time slice for queue3
-      //     p->ticks[1] = 16;
-      //   }
-      // }
-      // else if(p->priority == 0){
-      //   int match = 0;
-      //   for(int i = 0; i < NPROC; i++){
-      //     if(q0[i] == 0){
-      //       continue;
-      //     }
-      //     if(q0[i]->pid == p->pid){
-      //       match = 1;
-      //       break;
-      //     }
-      //   }
-      //   if (match == 0) {
-      //     for(int i = 0; i < NPROC; i++){
-      //       if(q0[i] == 0){
-      //         q0[i] = p;
-      //         break;
-      //       }
-      //     }
-      //     p->qtail[0] = p->qtail[0] + 1;
-      //     // set timer ticks for particular time slice for queue3
-      //     p->ticks[0] = 20;
-      //   }
-      //  }
-
       out = 0;
-      
     }
   }
   release(&ptable.lock);
@@ -902,7 +787,7 @@ int setpri(int PID, int pri){
 }
 
 int getpri(int PID){
-  
+
   int pri = -1;
   struct proc *p;
 
@@ -984,19 +869,19 @@ int getpinfo(struct pstat *mystruct){
   struct proc *p = ptable.proc;
 
   for(int i = 0; i < NPROC; i++){
+
     if (p[i].state == UNUSED || p[i].state == EMBRYO || p[i].state == ZOMBIE){
       mystruct->inuse[i] = 0;
     } else {
       mystruct->inuse[i] = 1;
     }
-    mystruct->pid[i] = p->pid;
-    mystruct->state[i] = p->state;
-    mystruct->priority[i] = p->priority;
+    mystruct->pid[i] = p[i].pid;
+    mystruct->state[i] = p[i].state;
+    mystruct->priority[i] = p[i].priority;
     for (int j = 0; j < 4; j++) {
-      mystruct->ticks[i][j] = p->ticksUsed[j];
-      mystruct->qtail[i][j] = p->qtail[j];
+      mystruct->ticks[i][j] = p[i].ticksUsed[j];
+      mystruct->qtail[i][j] = p[i].qtail[j];
     }
   }
   return 0;
 }
-
