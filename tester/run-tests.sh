@@ -65,11 +65,11 @@ print_error_message () {
     echo "  what results produced by your program: tests-out/$testnum.$filetype"
     echo "  compare the two using diff, cmp, or related tools to debug, e.g.:"
     echo "  prompt> diff $testdir/$testnum.$filetype tests-out/$testnum.$filetype"
-    #if (( $contrunning == 0 )); then
+    if (( $contrunning == 0 )); then
 	# (Mod) SUMMARY output
     	echo "*** SUMMARY: $correct_test / $total_test"
-     #   exit 0
-    #fi
+       exit 0
+    fi
 }
 
 # check_test testdir testnumber contrunning out/err

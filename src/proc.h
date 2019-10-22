@@ -1,5 +1,5 @@
-#ifndef _PROC_H_
-#define _PROC_H_
+// #ifndef _PROC_H_
+// #define _PROC_H_
 
 // Per-CPU state
 struct cpu {
@@ -53,12 +53,11 @@ struct proc {
   char name[16];               // Process name (debugging)
   int qtail[4];                // total num times moved to tail of this queue
                                // (e.g., setprio, end of timeslice, waking)
-  int ticks[4];           // total num ticks each process has accumulated
+  int ticks[4];                // total num ticks each process has accumulated
                                // at each priority
   int priority;                // current priority level of each process (0-3)
-
-  int ticksUsed[4];       // total num ticks each process has used up
-                               // at each priority
+  int ticksUsed[4];            // num ticks each process has used up
+                               // at its timeslice
 
 };
 
@@ -68,4 +67,4 @@ struct proc {
 //   fixed-size stack
 //   expandable heap
 
-#endif // _PROC_H_
+// #endif // _PROC_H_

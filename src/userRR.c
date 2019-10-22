@@ -1,6 +1,5 @@
 
 #include "types.h"
-#include "stat.h"
 #include "user.h"
 #include "pstat.h"
 #include "syscall.h"
