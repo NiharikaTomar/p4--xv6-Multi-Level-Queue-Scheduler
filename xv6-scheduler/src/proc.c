@@ -157,6 +157,7 @@ userinit(void)
   p->ticksUsed[3] = 0;
   q3[0] = p;
   p->qtail[3] = 1;
+  // cprintf("In UserInit setting to 1: %d\n", p->qtail[3]);
 
   release(&ptable.lock);
 }
@@ -352,6 +353,7 @@ scheduler(void)
               p->ticksUsed[3]++;
               p->ticks[3]++;
 
+              //cprintf("PID %d In scheduler ticks: %d\n",p->pid, p->ticksUsed[3]);
               if(p->ticksUsed[3] == 8) {
                 delete(q3, p->pid);
                 // Resetting timer tick
@@ -364,11 +366,12 @@ scheduler(void)
                   }
                 }
                 p->qtail[3]++;
+                //cprintf("PID %d In scheduler qtail: %d\n",p->pid, p->qtail[3]);
                 // Process is done running for now.
                 // It should have changed its p->state before coming back.
+              }
                 c->proc = 0;
                 goto start;
-              }
             }
           } else if (q3[k+1] != 0){
             continue;
@@ -397,7 +400,7 @@ scheduler(void)
 
               p->ticksUsed[2]++;
               p->ticks[2]++;
-
+              //cprintf("PID %d In scheduler ticks: %d\n",p->pid, p->ticksUsed[2]);
               if(p->ticksUsed[2] == 12) {
                 delete(q2, p->pid);
                 // Resetting timer tick
@@ -410,18 +413,16 @@ scheduler(void)
                   }
                 }
                 p->qtail[2]++;
+                //cprintf("PID %d In scheduler qtail: %d\n",p->pid, p->qtail[2]);
                 // Process is done running for now.
-                // It should have changed its p->state before coming back.
-                c->proc = 0;
-                cprintf("Ticks equal to 12 for pid: %d\n", q2[k]->pid);
-                goto start;
+                // It should have changed its p->state before coming back. 
               }
+              c->proc = 0;
+              goto start;
             }
           } else if (q2[k+1] != 0){
-            cprintf("Next process: %d\n", q2[k+1]->pid);
             continue;
           } else {
-            cprintf("ARE YOU HERE??????\n");
             break;
           }
         }
@@ -460,10 +461,10 @@ scheduler(void)
                 }
                 p->qtail[1]++;
                 // Process is done running for now.
-                // It should have changed its p->state before coming back.
-                c->proc = 0;
-                goto start;
+                // It should have changed its p->state before coming back. 
               }
+              c->proc = 0;
+              goto start;
             }
           } else if (q1[k+1] != 0){
             continue;
@@ -507,9 +508,9 @@ scheduler(void)
                 p->qtail[0]++;
                 // Process is done running for now.
                 // It should have changed its p->state before coming back.
+              }
                 c->proc = 0;
                 goto start;
-              }
             }
           } else if (q0[k+1] != 0){
             continue;
@@ -519,128 +520,6 @@ scheduler(void)
         }
       }
     }
-
-    //   // Priority queue 2
-    //   if (q2[k] != 0) {
-    //     p = q2[k];
-    //       if(p->state == RUNNABLE) {
-    //         // Switch to chosen process.  It is the process's job
-    //         // to release ptable.lock and then reacquire it
-    //         // before jumping back to us.
-    //         if(p->ticksUsed[2] < 12){
-    //           c->proc = p;
-    //           switchuvm(p);
-    //           p->state = RUNNING;
-    //           swtch(&(c->scheduler), p->context);
-    //           switchkvm();
-    //           p->ticks[2]++;
-    //           p->ticksUsed[2]++;
-    //           cprintf("Ticks less than 12\n");
-    //           cprintf("PID: %d \n", p->pid);
-
-    //           if(p->ticksUsed[2] == 12) {
-    //           cprintf("Ticks equal to 12\n");
-    //           cprintf("PID ___: %d \n", p->pid);
-    //             delete(q2, p->pid);
-    //             // Resetting timer tick
-    //             p->ticksUsed[2] = 0;
-    //             // Add to the end of the queue
-    //             for(int i = 0; i < NPROC; i++){
-    //               if(q2[i] == 0){
-    //                 q2[i] = p;
-    //                 break;
-    //               }
-    //             }
-    //             p->qtail[2]++;
-    //             // Process is done running for now.
-    //             // It should have changed its p->state before coming back.
-    //             c->proc = 0;
-    //           }
-    //         }
-    //       } else if (q2[k+1] != 0){
-    //         cprintf("%d not runnable\n", p->pid);
-    //         break;
-    //       }
-    //   }
-    //   // Prirority queue 1
-    //   if (q1[k] != 0) {
-    //     p = q1[k];
-    //       if(p->state == RUNNABLE) {
-    //         // Switch to chosen process.  It is the process's job
-    //         // to release ptable.lock and then reacquire it
-    //         // before jumping back to us.
-    //         if(p->ticksUsed[1] < 16){
-    //           c->proc = p;
-    //           switchuvm(p);
-    //           p->state = RUNNING;
-    //           swtch(&(c->scheduler), p->context);
-    //           switchkvm();
-
-    //           p->ticks[1]++;
-    //           p->ticksUsed[1]++;
-
-    //           if(p->ticksUsed[1] == 16) {
-    //             // Resetting timer tick
-    //             p->ticksUsed[1] = 0;
-    //             delete(q1, p->pid);
-    //             // Add to the end of the queue
-    //             for(int i = 0; i < NPROC; i++){
-    //               if(q1[i] == 0){
-    //                 q1[i] = p;
-    //                 break;
-    //               }
-    //             }
-
-    //             p->qtail[1]++;
-    //             // Process is done running for now.
-    //             // It should have changed its p->state before coming back.
-    //             c->proc = 0;
-    //           }
-    //         }
-    //       } else if (q1[k+1] != 0){
-    //         break;
-    //       }
-    //   }
-    //   // Priority queue 0
-    //   if (q0[k] != 0) {
-    //     p = q0[k];
-    //       if(p->state == RUNNABLE) {
-    //         //  && p->pid == q0[k]->pid
-    //         // Switch to chosen process.  It is the process's job
-    //         // to release ptable.lock and then reacquire it
-    //         // before jumping back to us.
-    //         if(p->ticksUsed[0] < 20){
-    //           c->proc = p;
-    //           switchuvm(p);
-    //           p->state = RUNNING;
-    //           swtch(&(c->scheduler), p->context);
-    //           switchkvm();
-
-    //           p->ticks[0]++;
-    //           p->ticksUsed[0]++;
-
-    //           if(p->ticksUsed[0] == 20) {
-    //             // Resetting timer tick
-    //             p->ticksUsed[0] = 0;
-    //             delete(q0, p->pid);
-    //             // Add to the end of the queue
-    //             for(int i = 0; i < NPROC; i++){
-    //               if(q0[i] == 0){
-    //                 q0[i] = p;
-    //                 break;
-    //               }
-    //             }
-    //             p->qtail[0]++;
-    //             // Process is done running for now.
-    //             // It should have changed its p->state before coming back.
-    //             c->proc = 0;
-    //           }
-    //         }
-    //       } else if (q0[k+1] != 0){
-    //         break;
-    //       }
-    //   }
-    // }
     release(&ptable.lock);
   }
 }
@@ -776,6 +655,7 @@ wakeup1(void *chan)
         // Resetting timer tick
         p->ticksUsed[2] = 0;
         p->qtail[2]++;
+        // cprintf("PID %d In wakeup1: %d\n",p->pid, p->qtail[2]);
       } else if (p->priority == 1) {
         delete(q1, p->pid);
         // Add to the end of the queue
@@ -925,6 +805,7 @@ int setpri(int PID, int pri){
       p->priority = pri;
       p->ticksUsed[pri] = 0;
       p->qtail[pri]++;
+      // cprintf("In setpri: %d\n", p->qtail[pri]);
       out = 0;
     }
   }
@@ -1027,6 +908,7 @@ fork2(int pri)
         }
       }
       np->qtail[2]++;
+      // cprintf("PID %d In fork2 qtail: %d\n", np->pid, np->qtail[2]);
   } else if (pri == 1){
       for(int i = 0; i < NPROC; i++){
         if(q1[i] == 0){
